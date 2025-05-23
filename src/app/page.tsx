@@ -1,3 +1,180 @@
-export default function Home() {
-  return <></>;
+
+"use client";
+
+import { useState, type ChangeEvent } from "react";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { AlertCircle, Repeat, Copy } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+
+export default function EchoChamberPage() {
+  const [inputText, setInputText] = useState<string>("");
+  const [repeatCountInput, setRepeatCountInput] = useState<string>("5");
+  const [addPeriod, setAddPeriod] = useState<boolean>(false);
+  const [addNewLine, setAddNewLine] = useState<boolean>(false);
+  const [addSpace, setAddSpace] = useState<boolean>(true); // Default to true for better initial usability
+  const [outputText, setOutputText] = useState<string>("");
+  const [error, setError] = useState<string>("");
+  const { toast } = useToast();
+
+  const MAX_REPEAT_COUNT = 1000;
+
+  const handleRepeat = () => {
+    setError("");
+    setOutputText(""); 
+
+    const currentRepeatCount = parseInt(repeatCountInput, 10);
+
+    if (!inputText.trim()) {
+      setError("Please enter some text to repeat.");
+      return;
+    }
+    if (isNaN(currentRepeatCount) || currentRepeatCount <= 0 || currentRepeatCount > MAX_REPEAT_COUNT) {
+      setError(`Please enter a valid repeat count (1-${MAX_REPEAT_COUNT}).`);
+      return;
+    }
+
+    let result = "";
+    for (let i = 0; i < currentRepeatCount; i++) {
+      result += inputText;
+      if (i < currentRepeatCount - 1) { // Add separator only if it's not the last item
+        if (addPeriod) result += ".";
+        if (addSpace) result += " ";
+        if (addNewLine) result += "\n";
+      }
+    }
+    setOutputText(result);
+  };
+
+  const handleCopyToClipboard = async () => {
+    if (!outputText) return;
+    try {
+      await navigator.clipboard.writeText(outputText);
+      toast({
+        title: "Success!",
+        description: "Text copied to clipboard.",
+        duration: 3000,
+      });
+    } catch (err) {
+      console.error("Failed to copy text: ", err);
+      toast({
+        title: "Error",
+        description: "Failed to copy text to clipboard.",
+        variant: "destructive",
+        duration: 3000,
+      });
+    }
+  };
+
+  return (
+    <main className="min-h-screen bg-background text-foreground flex flex-col items-center justify-center p-4 sm:p-6 md:p-8 font-mono">
+      <Card className="w-full max-w-2xl shadow-2xl rounded-xl overflow-hidden">
+        <CardHeader className="text-center pt-8 bg-card">
+          <div className="flex items-center justify-center space-x-3 mb-3">
+            <Repeat className="h-12 w-12 text-primary animate-pulse" />
+            <CardTitle className="text-5xl font-extrabold text-primary tracking-tight">Echo Chamber</CardTitle>
+          </div>
+          <CardDescription className="text-lg text-muted-foreground px-4">
+            Amplify your words. Effortlessly repeat and format text exactly how you want it.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6 p-6 sm:p-8 bg-card">
+          <div className="space-y-2">
+            <Label htmlFor="inputText" className="text-md font-semibold text-foreground/90">Your Text</Label>
+            <Textarea
+              id="inputText"
+              value={inputText}
+              onChange={(e) => setInputText(e.target.value)}
+              placeholder="Enter text to be echoed..."
+              rows={4}
+              className="font-mono text-base rounded-lg shadow-sm focus:ring-2 focus:ring-ring border-input"
+              aria-label="Input text to be repeated"
+            />
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4 items-start">
+            <div className="space-y-2">
+              <Label htmlFor="repeatCount" className="text-md font-semibold text-foreground/90">Repetitions</Label>
+              <Input
+                id="repeatCount"
+                type="number"
+                value={repeatCountInput}
+                onChange={(e) => setRepeatCountInput(e.target.value)}
+                min="1"
+                max={MAX_REPEAT_COUNT.toString()}
+                placeholder="e.g., 5"
+                className="font-mono text-base w-full rounded-lg shadow-sm focus:ring-2 focus:ring-ring border-input"
+                aria-label="Number of repetitions"
+              />
+            </div>
+            <div className="space-y-3">
+               <Label className="text-md font-semibold text-foreground/90 block mb-2">Formatting Options</Label>
+              <div className="flex items-center space-x-2">
+                <Checkbox id="addPeriod" checked={addPeriod} onCheckedChange={(checked) => setAddPeriod(checked as boolean)} className="h-5 w-5 border-accent data-[state=checked]:bg-accent data-[state=checked]:text-accent-foreground rounded focus:ring-accent"/>
+                <Label htmlFor="addPeriod" className="text-sm cursor-pointer text-foreground/80 hover:text-foreground">Add period (.)</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Checkbox id="addSpace" checked={addSpace} onCheckedChange={(checked) => setAddSpace(checked as boolean)} className="h-5 w-5 border-accent data-[state=checked]:bg-accent data-[state=checked]:text-accent-foreground rounded focus:ring-accent"/>
+                <Label htmlFor="addSpace" className="text-sm cursor-pointer text-foreground/80 hover:text-foreground">Add space ( )</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Checkbox id="addNewLine" checked={addNewLine} onCheckedChange={(checked) => setAddNewLine(checked as boolean)} className="h-5 w-5 border-accent data-[state=checked]:bg-accent data-[state=checked]:text-accent-foreground rounded focus:ring-accent"/>
+                <Label htmlFor="addNewLine" className="text-sm cursor-pointer text-foreground/80 hover:text-foreground">Add new line (&#x21B5;)</Label>
+              </div>
+            </div>
+          </div>
+
+
+          {error && (
+            <div role="alert" className="flex items-center space-x-2 text-destructive-foreground p-3 bg-destructive rounded-lg border border-destructive/80 shadow-md">
+              <AlertCircle className="h-5 w-5 flex-shrink-0" />
+              <p className="text-sm font-medium">{error}</p>
+            </div>
+          )}
+
+          <Button 
+            onClick={handleRepeat} 
+            className="w-full text-lg py-3 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg shadow-lg transition-all duration-150 ease-in-out active:transform active:scale-[0.98] focus-visible:ring-4 focus-visible:ring-primary/50"
+            aria-label="Repeat the text with selected formatting"
+          >
+            <Repeat className="mr-2 h-5 w-5" />
+            Echo Text
+          </Button>
+
+          {outputText && (
+            <div className="space-y-2 pt-4 border-t border-border/50">
+              <Label htmlFor="outputText" className="text-md font-semibold text-foreground/90">Echoed Result</Label>
+              <Textarea
+                id="outputText"
+                value={outputText}
+                readOnly
+                rows={8}
+                className="font-mono text-base bg-muted/50 rounded-lg shadow-inner border-input p-3"
+                placeholder="Your echoed text will appear here..."
+                aria-label="Output of repeated text"
+                data-ai-hint="generated text"
+              />
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleCopyToClipboard}
+                className="mt-2 border-primary/50 text-primary hover:bg-primary/10 hover:text-primary focus-visible:ring-primary/50"
+                aria-label="Copy repeated text to clipboard"
+              >
+                <Copy className="mr-2 h-4 w-4" />
+                Copy to Clipboard
+              </Button>
+            </div>
+          )}
+        </CardContent>
+        <CardFooter className="text-center text-xs text-muted-foreground py-4 bg-card border-t border-border/20">
+          <p>&copy; {new Date().getFullYear()} Echo Chamber. Amplify Your Message.</p>
+        </CardFooter>
+      </Card>
+    </main>
+  );
 }
