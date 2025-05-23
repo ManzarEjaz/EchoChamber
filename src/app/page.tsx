@@ -115,10 +115,14 @@ export default function EchoChamberPage() {
     }
 
     let muwahText = "";
-    const baseAcount = 1; 
-
+    
     for (let i = 0; i < currentRepeatCount; i++) {
-      const currentMuwah = "Muw" + 'a'.repeat(baseAcount + i) + "h " + muwahPlusEmoji;
+      // Base increasing count + a small random addition for 'a's
+      const baseAIncrement = i + 1; // Starts at 1, then 2, 3...
+      const randomExtraAs = Math.floor(Math.random() * 3); // Adds 0, 1, or 2 'a's
+      const aCount = baseAIncrement + randomExtraAs;
+      
+      const currentMuwah = "Muw" + 'a'.repeat(Math.max(1, aCount)) + "h " + muwahPlusEmoji; // Ensure at least one 'a'
       muwahText += currentMuwah;
       if (i < currentRepeatCount - 1) {
         muwahText += " "; // Simple space separator for Muwah+ internal structure
