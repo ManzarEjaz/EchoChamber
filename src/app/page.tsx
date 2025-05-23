@@ -310,7 +310,7 @@ export default function EchoChamberPage() {
           )}
         </CardContent>
         <CardFooter className="text-center text-xs text-muted-foreground py-4 bg-card border-t border-border/20">
-          {currentYear !== null ? <p>&copy; {currentYear} Echo Chamber. Amplify Your Message.</p> : <p>Loading year...</p>}
+          {currentYear !== null ? <p>&copy; {currentYear} Echo Chamber. By Md Manjar Ejaz. Amplify Your Message.</p> : <p>Loading year...</p>}
         </CardFooter>
       </Card>
     </main>
