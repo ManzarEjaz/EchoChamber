@@ -1,5 +1,2 @@
-# Firebase Studio
-
-This is a NextJS starter in Firebase Studio.
-
-To get started, take a look at src/app/page.tsx.
+# EchoChamber
+EchoChamer is a text repeating tool used to repeat text which is usfeful to ones who need it
