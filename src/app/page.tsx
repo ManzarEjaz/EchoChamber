@@ -82,15 +82,17 @@ export default function EchoChamberPage() {
 
   const handleTemplateButtonClick = (templateText: string) => {
     setError("");
-    setOutputText("");
+    // setOutputText(""); // Output text will be set by generateRepeatedTextInternal via handleRepeat logic
     setInputText(templateText); 
 
     const currentRepeatCount = parseInt(repeatCountInput, 10);
     if (isNaN(currentRepeatCount) || currentRepeatCount <= 0 || currentRepeatCount > MAX_REPEAT_COUNT) {
       setError(`Please enter a valid repeat count (1-${MAX_REPEAT_COUNT}) for the template.`);
+      setOutputText(""); // Clear output text if there's an error with repeat count
       return;
     }
     
+    // Re-use the main repeat logic after setting the input text
     const result = generateRepeatedTextInternal(
       templateText,
       currentRepeatCount,
@@ -122,15 +124,21 @@ export default function EchoChamberPage() {
       return;
     }
 
-    const emojiArray = Array.from(trimmedEmojis); // Correctly splits multi-codepoint emojis
+    // Correctly splits multi-codepoint emojis and filters out pure whitespace characters
+    const emojiArray = Array.from(trimmedEmojis).filter(emoji => emoji.trim() !== '');
+
+    if (emojiArray.length === 0) {
+        setError("Please enter valid emoji characters for Muwah+. Avoid using only spaces.");
+        return;
+    }
+
     let muwahText = "";
     
     for (let i = 0; i < currentRepeatCount; i++) {
       const aCount = Math.floor(Math.random() * 9) + 1; // Random number of 'a's between 1 and 9
       
-      const selectedEmoji = emojiArray.length > 0 
-        ? emojiArray[Math.floor(Math.random() * emojiArray.length)] 
-        : "💗"; // Fallback, though already checked by trimmedEmojis
+      // Select a random emoji from the filtered array
+      const selectedEmoji = emojiArray[Math.floor(Math.random() * emojiArray.length)];
       
       const currentMuwah = "Muw" + 'a'.repeat(aCount) + "h " + selectedEmoji;
       muwahText += currentMuwah;
@@ -142,7 +150,7 @@ export default function EchoChamberPage() {
     setOutputText(muwahText);
     toast({
         title: "Muwah+ Generated!",
-        description: `Created ${currentRepeatCount} random-length Muwahs with emojis: ${trimmedEmojis}.`,
+        description: `Created ${currentRepeatCount} random-length Muwahs with randomly selected emojis: ${trimmedEmojis}.`,
         duration: 3000,
       });
   };
